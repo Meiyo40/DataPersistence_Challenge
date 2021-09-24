@@ -9,22 +9,24 @@ public class MainManager : MonoBehaviour
     public Brick BrickPrefab;
     public int LineCount = 6;
     public Rigidbody Ball;
-
     public Text ScoreText;
     public GameObject GameOverText;
-    
+
     private bool m_Started = false;
     private int m_Points;
-    
     private bool m_GameOver = false;
 
-    
     // Start is called before the first frame update
     void Start()
     {
+        Debug.Log(GameState.Instance.PlayerName);
+        this.m_Points = GameState.Instance.Score;
+        this.UpdatePointUI();
+        this.SetRecord();
+
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
-        
+
         int[] pointCountArray = new [] {1,1,2,2,5,5};
         for (int i = 0; i < LineCount; ++i)
         {
@@ -35,6 +37,15 @@ public class MainManager : MonoBehaviour
                 brick.PointValue = pointCountArray[i];
                 brick.onDestroyed.AddListener(AddPoint);
             }
+        }
+    }
+
+    private void SetRecord()
+    {
+        if(GameState.Instance.HighestScore > 0)
+        {
+            string textToPrint = "Best Score: " + GameState.Instance.HighestScore + " Name: " + GameState.Instance.HighestScorePlayerName;
+            GameObject.Find("RecordText").GetComponent<Text>().text = textToPrint;
         }
     }
 
@@ -60,11 +71,30 @@ public class MainManager : MonoBehaviour
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
         }
+
+        if(Input.GetKeyDown(KeyCode.Escape))
+        {
+            GameState.Instance.SaveData();
+            SceneManager.LoadScene("StartMenu");
+        }
     }
 
     void AddPoint(int point)
     {
         m_Points += point;
+
+        GameState.Instance.UpdateScore(m_Points);
+        this.UpdatePointUI();
+
+        if (GameState.Instance.IsNewRecord)
+        {
+            this.SetRecord();
+            GameState.Instance.IsNewRecord = false;
+        }
+    }
+
+    void UpdatePointUI()
+    {
         ScoreText.text = $"Score : {m_Points}";
     }
 
