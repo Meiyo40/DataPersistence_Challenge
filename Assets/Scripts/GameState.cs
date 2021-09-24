@@ -56,7 +56,9 @@ public class GameState : MonoBehaviour
         data.playerName = this.playerName;
         data.highestScorePlayerName = this.highestScorePlayerName;
 
-        File.WriteAllText(Application.persistentDataPath + PathToSave, JsonUtility.ToJson(data));
+        string json = JsonUtility.ToJson(data);
+
+        File.WriteAllText(Application.persistentDataPath + PathToSave, json);
     }
 
     public void LoadData()
@@ -67,7 +69,16 @@ public class GameState : MonoBehaviour
         {
             string json = File.ReadAllText(path);
 
+            Debug.Log(json);
+
             SavedData data = JsonUtility.FromJson<SavedData>(json);
+
+            this.score = data.score;
+            this.playerName = data.playerName;
+            this.highestScore = data.highestScore;
+            this.highestScorePlayerName = data.highestScorePlayerName;
+
+            Debug.Log("Saved data loaded.");
         }
     }
 
